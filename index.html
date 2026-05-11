@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeNO 報告系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a5f7a;
+    --primary-light: #e8f4f8;
+    --primary-mid: #2d8ab0;
+    --accent: #e07b39;
+    --success: #2e7d5e;
+    --success-light: #eaf5f0;
+    --warning: #c85c1a;
+    --warning-light: #fdf2eb;
+    --mid: #f57c35;
+    --mid-light: #fef4ec;
+    --danger: #b03030;
+    --danger-light: #faeaea;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --border-radius: 10px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f7f9fc;
+    color: var(--gray-900);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .header {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+  }
+  .header-logo {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+  }
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 0.02em;
+  }
+  .header-sub {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Tab */
+  .tab-bar {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .tab-bar-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    padding: 0 24px;
+    gap: 0;
+  }
+  .tab-btn {
+    padding: 14px 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-400);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--primary); }
+  .tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+  }
+  .tab-icon { font-size: 16px; }
+
+  /* Main */
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Card */
+  .card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  /* Form */
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .form-group {
+    flex: 1;
+    min-width: 160px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    color: var(--gray-900);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,95,122,0.10);
+  }
+  .feno-input-wrap {
+    position: relative;
+  }
+  .feno-input-wrap input {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    padding-right: 48px;
+  }
+  .feno-unit {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: var(--gray-400);
+    font-family: 'DM Mono', monospace;
+    pointer-events: none;
+  }
+  .select-wrap {
+    position: relative;
+  }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+    font-size: 12px;
+  }
+
+  /* Radio group */
+  .radio-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .radio-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-btn input { display: none; }
+  .radio-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .radio-btn.selected {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  /* Date input */
+  input[type="date"] {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+  }
+
+  /* Generate button */
+  .btn-generate {
+    width: 100%;
+    padding: 13px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.03em;
+    margin-top: 4px;
+  }
+  .btn-generate:hover { background: var(--primary-mid); }
+  .btn-generate:active { transform: scale(0.99); }
+
+  /* Result */
+  .result-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    margin-top: 20px;
+  }
+  .result-header {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .result-header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.04em;
+  }
+  .result-header.low { background: var(--success); }
+  .result-header.mid { background: var(--mid); }
+  .result-header.high { background: var(--danger); }
+
+  .result-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: rgba(255,255,255,0.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 500;
+  }
+
+  .result-body {
+    padding: 20px;
+  }
+
+  /* Patient output */
+  .patient-output {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--gray-700);
+    white-space: pre-wrap;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+
+  .btn-copy {
+    margin-top: 14px;
+    padding: 10px 20px;
+    background: white;
+    border: 1.5px solid var(--primary);
+    color: var(--primary);
+    border-radius: 8px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-copy:hover { background: var(--primary-light); }
+  .btn-copy.copied { background: var(--success-light); border-color: var(--success); color: var(--success); }
+
+  /* Doctor result sections */
+  .dx-section {
+    margin-bottom: 16px;
+  }
+  .dx-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+  }
+  .dx-content {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--gray-700);
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 3px solid;
+  }
+  .dx-content.low { background: var(--success-light); border-color: var(--success); }
+  .dx-content.mid { background: var(--mid-light); border-color: var(--mid); }
+  .dx-content.high { background: var(--danger-light); border-color: var(--danger); }
+
+  .dx-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .dx-bullet {
+    color: var(--primary);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Warning box */
+  .warning-box {
+    background: #fffbf0;
+    border: 1px solid #f0d080;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .warning-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a6800;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .warning-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .warning-list li {
+    font-size: 13px;
+    color: var(--gray-700);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  .warning-list li::before {
+    content: '→';
+    color: #c8a030;
+    flex-shrink: 0;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* DDx box */
+  .ddx-box {
+    background: var(--primary-light);
+    border: 1px solid #b8d8e8;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .ddx-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .ddx-content {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.8;
+  }
+
+  /* Ref box */
+  .ref-box {
+    font-size: 11px;
+    color: var(--gray-400);
+    font-family: 'DM Mono', monospace;
+    border-top: 1px solid var(--gray-100);
+    padding-top: 12px;
+    margin-top: 4px;
+    line-height: 1.8;
+  }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--gray-100);
+    margin: 16px 0;
+  }
+
+  /* Trend badge */
+  .trend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .trend-down { background: var(--success-light); color: var(--success); }
+  .trend-same { background: var(--mid-light); color: var(--warning); }
+  .trend-up { background: var(--danger-light); color: var(--danger); }
+
+  /* Hidden */
+  .hidden { display: none !important; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .main { padding: 20px 16px 60px; }
+    .header-inner { padding: 0; }
+    .tab-btn { padding: 12px 16px; font-size: 13px; }
+    .form-group { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-logo">NO</div>
+    <div class="header-title">FeNO 報告系統</div>
+    <div class="header-sub">部北胸腔內科</div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab-bar-inner">
+    <button class="tab-btn active" onclick="switchTab('tech')" id="tab-tech">
+      <span class="tab-icon">📋</span>技術員｜病人報告
+    </button>
+    <button class="tab-btn" onclick="switchTab('doc')" id="tab-doc">
+      <span class="tab-icon">🩺</span>醫師｜臨床判讀
+    </button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ===== TAB 1: TECHNICIAN ===== -->
+  <div class="tab-panel active" id="panel-tech">
+
+    <div class="card">
+      <div class="card-title">輸入檢測資料</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>FeNO 數值</label>
+          <div class="feno-input-wrap">
+            <input type="number" id="t-feno" min="1" max="300" placeholder="例：32" oninput="techClearResult()">
+            <span class="feno-unit">ppb</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>報告日期</label>
+          <input type="date" id="t-date">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>年齡分組</label>
+          <div class="radio-group" id="t-age-group">
+            <label class="radio-btn selected" onclick="selectRadio('t-age-group', this)">
+              <input type="radio" name="t-age" value="adult" checked> 成人（≥18歲）
+            </label>
+            <label class="radio-btn" onclick="selectRadio('t-age-group', this)">
+              <input type="radio" name="t-age" value="child"> 兒童（＜18歲）
+            </label>
+          </div>
+        </div>
+      </div>
+
+
+
+      <button class="btn-generate" onclick="generatePatientReport()">產出病人報告</button>
+    </div>
+
+    <div id="tech-result" class="hidden">
+      <div class="result-card">
+        <div class="result-header" id="tech-result-header">
+          <div class="result-header-title" id="tech-result-title"></div>
+          <div class="result-badge" id="tech-result-badge"></div>
+        </div>
+        <div class="result-body">
+          <div class="patient-output" id="patient-output"></div>
+          <button class="btn-copy" id="copy-btn" onclick="copyReport()">
+            <span>📋</span><span id="copy-text">一鍵複製報告</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== TAB 2: DOCTOR ===== -->
+  <div class="tab-panel" id="panel-doc">
+
+    <div class="card">
+      <div class="card-title">輸入臨床資料</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>FeNO 數值</label>
+          <div class="feno-input-wrap">
+            <input type="number" id="d-feno" min="1" max="300" placeholder="例：42" oninput="docClearResult()">
+            <span class="feno-unit">ppb</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>年齡分組</label>
+          <div class="radio-group" id="d-age-group">
+            <label class="radio-btn selected" onclick="selectRadio('d-age-group', this)">
+              <input type="radio" name="d-age" value="adult" checked> 成人（≥18歲）
+            </label>
+            <label class="radio-btn" onclick="selectRadio('d-age-group', this)">
+              <input type="radio" name="d-age" value="child"> 兒童（＜18歲）
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>臨床情境</label>
+          <div class="radio-group" id="d-scenario-group">
+            <label class="radio-btn selected" onclick="selectRadio('d-scenario-group', this); togglePrevFeno()">
+              <input type="radio" name="d-scenario" value="naive" checked> 未治療初診
+            </label>
+            <label class="radio-btn" onclick="selectRadio('d-scenario-group', this); togglePrevFeno()">
+              <input type="radio" name="d-scenario" value="ics"> ICS 治療追蹤
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row" id="prev-feno-row" style="display:none">
+        <div class="form-group">
+          <label>前次 FeNO 數值（選填）</label>
+          <div class="feno-input-wrap">
+            <input type="number" id="d-prev-feno" min="1" max="300" placeholder="上次數值">
+            <span class="feno-unit">ppb</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-generate" onclick="generateDoctorReport()">產出臨床判讀</button>
+    </div>
+
+    <div id="doc-result" class="hidden">
+
+      <div class="result-card">
+        <div class="result-header" id="doc-result-header">
+          <div class="result-header-title" id="doc-result-title"></div>
+          <div class="result-badge" id="doc-result-badge"></div>
+        </div>
+        <div class="result-body">
+
+          <div class="dx-section">
+            <div class="dx-label">判讀結果</div>
+            <div class="dx-content" id="doc-dx-content"></div>
+          </div>
+
+          <div id="doc-trend-section" class="dx-section hidden">
+            <div class="dx-label">趨勢分析</div>
+            <div id="doc-trend-content"></div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="warning-box">
+            <div class="warning-title">⚠️ 判讀前請確認以下干擾因子</div>
+            <ul class="warning-list">
+              <li>吸菸（4小時內）— 數值可能<strong>偏低</strong></li>
+              <li>高硝酸鹽食物，如菠菜、空心菜（3小時內）— 數值可能<strong>偏高</strong></li>
+              <li>呼吸道感染（6週內）— 建議感染緩解後重新檢測</li>
+              <li>目前使用 ICS／OCS — 數值可能受<strong>抑制</strong></li>
+              <li>已知過敏性鼻炎／慢性鼻竇炎 — FeNO 升高可能來自上呼吸道，非氣喘專一</li>
+              <li>阻塞性睡眠呼吸中止症（OSA）— 亦可能造成 FeNO 升高</li>
+            </ul>
+          </div>
+
+          <div class="ddx-box">
+            <div class="ddx-title">🔍 鑑別診斷提醒</div>
+            <div class="ddx-content">
+              FeNO <strong>偏高</strong>不等於氣喘，需排除：過敏性鼻炎、慢性鼻竇炎、OSA、嗜酸球性肺炎、近期病毒感染。<br>
+              FeNO <strong>偏低</strong>不能排除非嗜酸球性氣喘（中性球型）。
+            </div>
+          </div>
+
+          <div class="ref-box">
+            參考依據：Dweik RA et al. Am J Respir Crit Care Med 2011;184:602–615 ／ NICE NG245 2024 ／ GINA 2025
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// Radio button selection
+function selectRadio(groupId, el) {
+  var group = document.getElementById(groupId);
+  group.querySelectorAll('.radio-btn').forEach(function(b) { b.classList.remove('selected'); });
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+}
+
+// Toggle prev feno row
+function togglePrevFeno() {
+  setTimeout(function() {
+    var scenario = document.querySelector('input[name="d-scenario"]:checked').value;
+    document.getElementById('prev-feno-row').style.display = (scenario === 'ics') ? 'flex' : 'none';
+  }, 10);
+}
+
+function techClearResult() { document.getElementById('tech-result').classList.add('hidden'); }
+function docClearResult() { document.getElementById('doc-result').classList.add('hidden'); }
+
+// Get level
+function getLevel(feno, isChild) {
+  if (isChild) {
+    if (feno < 20) return 'low';
+    if (feno <= 35) return 'mid';
+    return 'high';
+  } else {
+    if (feno < 25) return 'low';
+    if (feno <= 50) return 'mid';
+    return 'high';
+  }
+}
+
+function getLevelLabel(level) {
+  if (level === 'low') return '低濃度';
+  if (level === 'mid') return '中間濃度';
+  return '高濃度';
+}
+
+function getLevelRange(level, isChild) {
+  if (isChild) {
+    if (level === 'low') return '< 20 ppb';
+    if (level === 'mid') return '20–35 ppb';
+    return '> 35 ppb';
+  } else {
+    if (level === 'low') return '< 25 ppb';
+    if (level === 'mid') return '25–50 ppb';
+    return '> 50 ppb';
+  }
+}
+
+// ===== PATIENT REPORT =====
+function generatePatientReport() {
+  var fenoVal = document.getElementById('t-feno').value;
+  if (!fenoVal || fenoVal < 1) { alert('請輸入 FeNO 數值'); return; }
+
+  var feno = parseFloat(fenoVal);
+  var isChild = document.querySelector('input[name="t-age"]:checked').value === 'child';
+  var dateVal = document.getElementById('t-date').value;
+  var dateStr = dateVal ? formatDate(dateVal) : '＿＿＿＿年＿＿月＿＿日';
+
+  var level = getLevel(feno, isChild);
+  var levelLabel = getLevelLabel(level);
+
+  // Build recommendation
+  var rec = '';
+  if (level === 'low') {
+    rec = '您的 FeNO 數值在正常範圍內。若您有呼吸道症狀（如咳嗽、喘鳴、胸悶），或有吸菸習慣（吸菸可能使數值偏低，不能完全排除氣道發炎），建議至胸腔科門診進一步評估。';
+  } else {
+    rec = '您的 FeNO 數值偏高，顯示氣道可能有過敏性發炎，建議至胸腔科門診進一步評估。';
+  }
+
+  var report = [
+    '呼出氣體一氧化氮（FeNO）檢測結果說明',
+    '',
+    '您的檢測結果：' + feno + ' ppb',
+    '',
+    '【這個檢查在測什麼？】',
+    'FeNO 是測量呼出氣體中一氧化氮的濃度。當氣道有過敏性發炎時，數值會升高。這項檢查可幫助醫師了解您的氣道是否有發炎，以及是否適合使用吸入型類固醇治療。',
+    '',
+    '【您的結果代表什麼？】',
+    '數值低於 ' + (isChild ? '20' : '25') + ' ppb，代表氣道過敏發炎的可能性較低。',
+    '數值介於 ' + (isChild ? '20 至 35' : '25 至 50') + ' ppb 之間，需要搭配您的症狀一起判斷。',
+    '數值高於 ' + (isChild ? '35' : '50') + ' ppb，代表氣道有明顯過敏發炎的跡象。',
+    '',
+    '您的數值為 ' + feno + ' ppb，屬於【' + levelLabel + '】。',
+    '',
+    '【下一步建議】',
+    rec,
+    '',
+    '報告日期：' + dateStr
+  ].join('\n');
+
+  // Display
+  var header = document.getElementById('tech-result-header');
+  header.className = 'result-header ' + level;
+  document.getElementById('tech-result-title').textContent = levelLabel + '　' + getLevelRange(level, isChild);
+  document.getElementById('tech-result-badge').textContent = feno + ' ppb';
+  document.getElementById('patient-output').textContent = report;
+  document.getElementById('copy-btn').classList.remove('copied');
+  document.getElementById('copy-text').textContent = '一鍵複製報告';
+  document.getElementById('tech-result').classList.remove('hidden');
+  document.getElementById('tech-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copyReport() {
+  var text = document.getElementById('patient-output').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('copy-btn');
+    btn.classList.add('copied');
+    document.getElementById('copy-text').textContent = '已複製 ✓';
+    setTimeout(function() {
+      btn.classList.remove('copied');
+      document.getElementById('copy-text').textContent = '一鍵複製報告';
+    }, 2500);
+  });
+}
+
+// ===== DOCTOR REPORT =====
+function generateDoctorReport() {
+  var fenoVal = document.getElementById('d-feno').value;
+  if (!fenoVal || fenoVal < 1) { alert('請輸入 FeNO 數值'); return; }
+
+  var feno = parseFloat(fenoVal);
+  var isChild = document.querySelector('input[name="d-age"]:checked').value === 'child';
+  var scenario = document.querySelector('input[name="d-scenario"]:checked').value;
+  var prevFenoVal = document.getElementById('d-prev-feno').value;
+  var prevFeno = prevFenoVal ? parseFloat(prevFenoVal) : null;
+
+  var level = getLevel(feno, isChild);
+  var levelLabel = getLevelLabel(level);
+
+  // Header
+  var header = document.getElementById('doc-result-header');
+  header.className = 'result-header ' + level;
+  document.getElementById('doc-result-title').textContent =
+    levelLabel + '　' + (scenario === 'naive' ? '未治療初診' : 'ICS 治療追蹤');
+  document.getElementById('doc-result-badge').textContent = feno + ' ppb';
+
+  // Interpretation
+  var dxContent = document.getElementById('doc-dx-content');
+  dxContent.className = 'dx-content ' + level;
+
+  var dxHtml = '';
+  if (scenario === 'naive') {
+    if (level === 'low') {
+      dxHtml = items([
+        '嗜酸球性氣道發炎<strong>可能性低</strong>；ICS 治療反應可能性低。',
+        '建議考慮其他診斷：過敏性鼻炎、COPD、GERD、聲帶功能異常、非嗜酸球性氣喘。',
+        '（ATS 2011 strong recommendation）'
+      ]);
+    } else if (level === 'mid') {
+      dxHtml = items([
+        '須<strong>結合臨床症狀</strong>綜合判斷，不宜單獨下診斷。',
+        '可能對 ICS 有反應；若臨床合適，考慮 empirical ICS trial。',
+        '建議 <strong>2–4 週後複測 FeNO</strong> 確認趨勢。',
+        '（ATS 2011 strong recommendation）'
+      ]);
+    } else {
+      dxHtml = items([
+        '嗜酸球性氣道發炎<strong>可能性高</strong>；ICS 治療反應可能性高。',
+        '若有症狀，<strong>支持氣喘診斷</strong>（NICE NG245 成人 cut-off ≥ 50 ppb）。',
+        '建議開始 ICS 治療，並 <strong>2–4 週後複測</strong> FeNO 確認反應。',
+        '（ATS 2011 strong recommendation）'
+      ]);
+    }
+  } else {
+    // ICS follow-up
+    if (level === 'low') {
+      dxHtml = items([
+        '目前數值已降至低濃度，<strong>ICS 治療反應良好</strong>。',
+        '建議維持目前治療方案。'
+      ]);
+    } else if (level === 'mid') {
+      dxHtml = items([
+        '數值仍處於中間濃度，<strong>氣道發炎未完全緩解</strong>。',
+        '建議評估用藥順從性；若順從性良好，考慮升階治療。',
+        '建議 2–4 週後複測確認趨勢。'
+      ]);
+    } else {
+      dxHtml = items([
+        '數值持續偏高，<strong>氣喘控制不佳</strong>。',
+        '建議評估用藥順從性（FeNO suppression test 概念）。',
+        '考慮升階治療或 biologic 評估（GINA 2025 步驟）。'
+      ]);
+    }
+  }
+  dxContent.innerHTML = dxHtml;
+
+  // Trend analysis
+  var trendSection = document.getElementById('doc-trend-section');
+  var trendContent = document.getElementById('doc-trend-content');
+  if (scenario === 'ics' && prevFeno !== null) {
+    trendSection.classList.remove('hidden');
+    var diff = feno - prevFeno;
+    var pct = Math.round(Math.abs(diff) / prevFeno * 100);
+    var threshold = prevFeno > 50 ? 20 : 0; // percent threshold
+    var absThreshold = prevFeno < 50 ? 10 : 0;
+
+    var trendClass, trendIcon, trendMsg;
+    if (diff < 0 && (pct >= 20 || Math.abs(diff) >= 10)) {
+      trendClass = 'trend-down';
+      trendIcon = '↓';
+      trendMsg = '顯著下降（' + Math.abs(diff).toFixed(1) + ' ppb，' + pct + '%）→ ICS 治療反應良好，維持目前治療。';
+    } else if (diff > 0 && (pct >= 20 || diff >= 10)) {
+      trendClass = 'trend-up';
+      trendIcon = '↑';
+      trendMsg = '顯著上升（+' + diff.toFixed(1) + ' ppb，+' + pct + '%）→ 氣喘控制惡化；排除過敏原暴露增加、感染、順從性下降。';
+    } else {
+      trendClass = 'trend-same';
+      trendIcon = '→';
+      trendMsg = '無顯著變化（' + (diff >= 0 ? '+' : '') + diff.toFixed(1) + ' ppb）→ 評估用藥順從性；若持續偏高考慮升階治療。';
+    }
+
+    trendContent.innerHTML =
+      '<div class="trend-badge ' + trendClass + '">' + trendIcon + ' ' + prevFeno + ' → ' + feno + ' ppb</div>' +
+      '<div class="dx-content ' + (trendClass === 'trend-down' ? 'low' : trendClass === 'trend-up' ? 'high' : 'mid') + '" style="font-size:13px">' +
+      '<strong>前次：</strong>' + prevFeno + ' ppb　<strong>本次：</strong>' + feno + ' ppb　<strong>變化：</strong>' + (diff >= 0 ? '+' : '') + diff.toFixed(1) + ' ppb（' + (diff >= 0 ? '+' : '-') + pct + '%）<br><br>' +
+      trendMsg +
+      '<br><small style="color:var(--gray-400)">顯著變化切點：> 50 ppb 者變化 ≥ 20%；≤ 50 ppb 者變化 ≥ 10 ppb（ATS 2011）</small>' +
+      '</div>';
+  } else {
+    trendSection.classList.add('hidden');
+  }
+
+  document.getElementById('doc-result').classList.remove('hidden');
+  document.getElementById('doc-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function items(arr) {
+  return arr.map(function(t) {
+    return '<div class="dx-item"><span class="dx-bullet">·</span><span>' + t + '</span></div>';
+  }).join('');
+}
+
+function formatDate(val) {
+  var parts = val.split('-');
+  return parts[0] + ' 年 ' + parseInt(parts[1]) + ' 月 ' + parseInt(parts[2]) + ' 日';
+}
+
+// Set today's date default
+window.onload = function() {
+  var today = new Date();
+  var y = today.getFullYear();
+  var m = String(today.getMonth() + 1).padStart(2, '0');
+  var d = String(today.getDate()).padStart(2, '0');
+  document.getElementById('t-date').value = y + '-' + m + '-' + d;
+};
+</script>
+
+</body>
+</html>
